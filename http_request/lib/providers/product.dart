@@ -21,35 +21,28 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus(String? id) async {
-    bool favourite;
+  void _setFavValue(bool newValue) {
+    isFavorite = newValue;
+    notifyListeners();
+  }
 
-    if (isFavorite) {
-      favourite = false;
-    } else {
-      favourite = true;
-    }
-
+  Future<void> toggleFavoriteStatus(String? token, String? userId) async {
+    final oldStatus = isFavorite;
+    isFavorite = !isFavorite;
+    notifyListeners();
     final url = Uri.parse(
-        "https://flutter-test-a59d2-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json");
+        "https://flutter-test-a59d2-default-rtdb.europe-west1.firebasedatabase.app/UserFavourite/$userId/$id.json?auth=$token");
 
     try {
-      final response =
-          await http.patch(url, body: json.encode({"isFavourite": favourite}));
-
+      final response = await http.put(
+        url,
+        body: json.encode(isFavorite),
+      );
       if (response.statusCode >= 400) {
-        throw Exception();
+        _setFavValue(oldStatus);
       }
     } catch (error) {
-      print(error);
-      if (favourite) {
-        favourite = false;
-      } else {
-        favourite = true;
-      }
-    } finally {
-      isFavorite = favourite;
-      notifyListeners();
+      _setFavValue(oldStatus);
     }
   }
 }

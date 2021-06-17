@@ -1,5 +1,5 @@
 class HttpException implements Exception {
-  final String message;
+  var message;
 
   HttpException(this.message);
 
